@@ -1,0 +1,56 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: clarid
+          POSTGRES_PASSWORD: clarid
+          POSTGRES_DB: clarid
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U clarid"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    env:
+      DATABASE_URL: postgresql+psycopg2://clarid:clarid@localhost:5432/clarid
+      SECRET_KEY: this-is-a-long-ci-secret-key-please-change
+      FRONTEND_URL: http://localhost:5173
+      ENV: ci
+      COOKIE_SECURE: "false"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install deps
+        run: |
+          pip install -r backend/requirements.txt
+
+      - name: Lint (ruff)
+        run: |
+          ruff check backend/app backend/tests
+
+      - name: Migrations
+        run: |
+          cd backend
+          alembic upgrade head
+
+      - name: Tests
+        run: |
+          cd backend
+          pytest -q
+ci: add backend workflow (ruff + alembic + pytest)
