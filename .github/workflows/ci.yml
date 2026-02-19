@@ -53,4 +53,4 @@ jobs:
         run: |
           cd backend
           pytest -q
-ci: add backend workflow (ruff + alembic + pytest)
+
