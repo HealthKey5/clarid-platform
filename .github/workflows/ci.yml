@@ -28,6 +28,7 @@ jobs:
       FRONTEND_URL: http://localhost:5173
       ENV: ci
       COOKIE_SECURE: "false"
+      PYTHONPATH: backend
 
     steps:
       - uses: actions/checkout@v4
@@ -52,5 +53,4 @@ jobs:
       - name: Tests
         run: |
           cd backend
-          pytest -q
-
+          PYTHONPATH=. pytest -q
